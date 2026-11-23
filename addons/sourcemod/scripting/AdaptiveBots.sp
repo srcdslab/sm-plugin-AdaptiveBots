@@ -6,7 +6,7 @@
 #include <sdkhooks>
 #include <clientprefs>
 
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.0.1"
 
 #define DIFFICULTY_LEVELS 4
 #define DIFFICULTY_NONE -1
@@ -633,12 +633,13 @@ void StartReaddCheck()
 	g_hReaddTimer = CreateTimer(READD_CHECK_INTERVAL, Timer_ReaddCheck, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 
+// Bots playing on T or CT: fake clients parked in spectator (FakeClients plugin) are not game bots
 int CountBots()
 {
 	int iBots = 0;
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		if (IsClientInGame(client) && IsBot(client))
+		if (IsClientInGame(client) && IsBot(client) && GetClientTeam(client) >= 2)
 			iBots++;
 	}
 	return iBots;
@@ -712,7 +713,7 @@ void ReaddMismatchedBots(int iBots)
 
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		if (!IsClientInGame(client) || !IsBot(client) || IsClientInKickQueue(client))
+		if (!IsClientInGame(client) || !IsBot(client) || IsClientInKickQueue(client) || GetClientTeam(client) < 2)
 			continue;
 
 		GetClientName(client, sName, sizeof(sName));
